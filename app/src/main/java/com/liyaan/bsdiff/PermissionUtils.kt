@@ -1,0 +1,40 @@
+package com.liyaan.bsdiff
+
+import android.Manifest
+import android.app.Activity
+import android.content.pm.PackageManager
+import android.os.Build
+
+
+object PermissionUtils {
+    //这是要申请的权限
+    private val PERMISSIONS_CAMERA_AND_STORAGE = arrayOf<String>(
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.CAMERA,Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS)
+
+    /**
+     * 解决安卓6.0以上版本不能读取外部存储权限的问题
+     *
+     * @param activity
+     * @param requestCode
+     * @return
+     */
+    fun isGrantExternalRW(activity: Activity, requestCode: Int): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val storagePermission = activity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            val storagePermissionOne = activity.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+            val cameraPermission = activity.checkSelfPermission(Manifest.permission.CAMERA)
+            //检测是否有权限，如果没有权限，就需要申请
+            if (storagePermission != PackageManager.PERMISSION_GRANTED ||
+                    cameraPermission != PackageManager.PERMISSION_GRANTED || storagePermissionOne!=PackageManager.PERMISSION_GRANTED) {
+                //申请权限
+                activity.requestPermissions(PERMISSIONS_CAMERA_AND_STORAGE, requestCode)
+                //返回false。说明没有授权
+                return false
+            }
+        }
+        //说明已经授权
+        return true
+    }
+}
